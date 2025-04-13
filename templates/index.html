@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blood Group Detection From Fingerprint</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+  
+    h1 {
+      text-align: center;
+      margin-top: 30px;
+      color: #2c3e50;
+    }
+  
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 90vh;
+      flex-direction: column;
+      padding: 30px;
+    }
+  
+    .form-section {
+      width: 100%;
+      max-width: 500px;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+  
+    h2 {
+      color: #34495e;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+  
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .form-group {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+  
+    .form-group label,
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      max-width: 400px;
+    }
+  
+    label {
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+  
+    input[type="text"],
+    select,
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+  
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+  
+    button:hover {
+      background-color: #2980b9;
+    }
+  
+    .preview-container {
+      margin-top: 10px;
+    }
+  
+    #fingerprintPreview {
+      max-width: 100px;
+      max-height: 100px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+  
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+  
+    th {
+      background-color: #ecf0f1;
+      color: #2c3e50;
+    }
+  
+    .result-section {
+      margin-top: 30px;
+      width: 100%;
+      max-width: 600px;
+    }
+  </style>
+  
+</head>
+<body>
+  <h1>Blood Group Detection From Fingerprint</h1>
+
+  <div class="container">
+    <div class="form-section">
+      <h2>Enter Details</h2>
+      <form id="bloodGroupForm">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" placeholder="Enter your name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="mobile">Mobile</label>
+          <input type="text" id="mobile" placeholder="Enter your mobile number" pattern="[0-9]{10}" required />
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Gender</label>
+          <select id="gender" required>
+            <option value="" disabled selected>Select your gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="age">Age</label>
+          <select id="age" required>
+            <option value="" disabled selected>Select your age</option>
+            <script>
+              for (let i = 1; i <= 100; i++) {
+                document.write(`<option value="${i}">${i}</option>`);
+              }
+            </script>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="fingerprint">Upload Fingerprint</label>
+          <input type="file" id="fingerprint" accept="image/*" onchange="previewFingerprint()" required />
+        </div>
+
+        <div class="preview-container">
+          <img id="fingerprintPreview" alt="Fingerprint Preview" style="display: none;" />
+        </div>
+
+        <button type="button" onclick="submitDetails()">Detect Blood Group</button>
+      </form>
+    </div>
+
+    <div class="result-section" id="resultSection" style="display: none;">
+      <h2>Detection Result</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody id="resultTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function previewFingerprint() {
+      const fileInput = document.getElementById('fingerprint');
+      const previewImage = document.getElementById('fingerprintPreview');
+      const file = fileInput.files[0];
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          previewImage.src = reader.result;
+          previewImage.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function submitDetails() {
+      const name = document.getElementById('name').value;
+      const mobile = document.getElementById('mobile').value;
+      const gender = document.getElementById('gender').value;
+      const age = document.getElementById('age').value;
+      const fingerprintFile = document.getElementById('fingerprint').files[0];
+
+      if (!name || !mobile || !gender || !age || !fingerprintFile) {
+        alert('Please fill all fields');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', fingerprintFile);
+
+      fetch('/predict', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          const resultSection = document.getElementById('resultSection');
+          const resultTableBody = document.getElementById('resultTableBody');
+
+          resultTableBody.innerHTML = `
+            <tr><td>Name</td><td>${name}</td></tr>
+            <tr><td>Mobile</td><td>${mobile}</td></tr>
+            <tr><td>Gender</td><td>${gender}</td></tr>
+            <tr><td>Fingerprint</td><td><img src="${document.getElementById('fingerprintPreview').src}" style="width: 100px; height: 100px; border: 1px solid #ccc; border-radius: 4px;"></td></tr>
+            <tr><td>Confidence</td><td>${data.confidence}</td></tr>
+            <tr><td>Blood Group</td><td>${data.predicted_label}</td></tr>
+          `;
+
+          resultSection.style.display = 'block';
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred. Please try again.');
+        });
+    }
+  </script>
+</body>
+</html>
